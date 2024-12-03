@@ -5,6 +5,8 @@ fun main() {
         println(o.nom)
         println(o.surface())
     }
+    println(ystudent)
+    println(morestudent)
 }
 
 abstract class Piece() {
@@ -34,3 +36,17 @@ val X = Cuisine();
 val Y = Salon();
 
 val Lclasse: Array<Piece> = arrayOf(X, Y);
+
+
+
+class Etudiant(val name: String, val promo: String, val matieres: List<String>);
+
+val etudiants = listOf(
+    Etudiant("paul", "2025", listOf("mobile", "web", "BDD")),
+    Etudiant("Yazid", "2024", listOf("mobile", "Android", "Reseau")),
+    Etudiant("Caroline", "2025", listOf("SE", "Anglais")),
+)
+
+val ystudent = etudiants.find { etudiant -> etudiant.promo == "2024" }?.name
+val morestudent = etudiants.filter { it.matieres.size > 2 }.map { it.name }
+//val allstudent = etudiants.fold({it})
