@@ -714,7 +714,7 @@ val playlistjson = """
                 """
 
 
-data class playlistjsonkotlin(
+data class PlayList(
     val checksum: String,
     val collaborative: Boolean,
     val cover: String,

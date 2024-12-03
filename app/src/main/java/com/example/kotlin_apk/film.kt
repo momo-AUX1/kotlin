@@ -2,6 +2,7 @@ package com.example.kotlin_apk
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -31,6 +32,7 @@ import androidx.navigation.*
 import androidx.navigation.compose.*
 import coil.compose.AsyncImage
 import com.example.kotlin_apk.ui.theme.KotlinapkTheme
+import com.squareup.moshi.Moshi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -63,6 +65,7 @@ fun MainScreen(viewModel: MainViewModel) {
             composable("series") { SeriesScreen(viewModel, navController) }
             composable("acteurs") { ActorsScreen(viewModel, navController) }
             composable("favoris") { FavoritesScreen(viewModel, navController) }
+            composable("music") { musicscreen(viewModel,navController)}
             composable("filmDetail/{movieId}") { backStackEntry ->
                 val movieId = backStackEntry.arguments?.getString("movieId")?.toIntOrNull()
                 if (movieId != null) {
@@ -119,8 +122,49 @@ fun BottomNavigationBar(navController: NavHostController) {
             selected = currentRoute == "favoris",
             onClick = { navController.navigate("favoris") }
         )
+        NavigationBarItem(
+            icon = { Icon(Icons.Filled.Favorite, contentDescription = "music") },
+            label = { Text("music") },
+            selected = currentRoute == "music",
+            onClick = { navController.navigate("music") }
+        )
     }
 }
+
+
+@Composable
+fun musicscreen(viewModel: MainViewModel, navController: NavHostController){
+    fun fetchPlayList(): PlayList? {
+        val moshi = Moshi.Builder().build()
+         return moshi.adapter(PlayList::class.java).fromJson(playlistjson)!!
+    }
+    val music by viewModel.music.collectAsState()
+
+    Column {
+        val configuration = LocalConfiguration.current
+        val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier.padding(12.dp)
+        ){
+          items(music) { sound ->
+
+                  AsyncImage(
+                      model = "file:///android_asset/images/${sound.cover}",
+                      contentDescription = "Image de ${sound.title}",
+                      modifier = Modifier
+                          .fillMaxWidth()
+                          .padding(bottom = 8.dp)
+                          .clip(RoundedCornerShape(8.dp))
+                  )
+          }
+        }
+    }
+
+}
+
+
 
 @Composable
 fun FilmScreen(viewModel: MainViewModel, navController: NavHostController) {
@@ -485,7 +529,9 @@ fun FilmDetailScreen(movieId: Int, viewModel: MainViewModel, navController: NavC
 
     if (movieDetails != null) {
         val movie = movieDetails!!
-        Column(modifier = Modifier.padding(16.dp).verticalScroll(rememberScrollState())) {
+        Column(modifier = Modifier
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())) {
             AsyncImage(
                 model = "https://image.tmdb.org/t/p/w500${movie.backdrop_path ?: movie.poster_path}",
                 contentDescription = "Poster de ${movie.title}",
@@ -606,7 +652,9 @@ fun SeriesDetailScreen(seriesId: Int, viewModel: MainViewModel, navController: N
 
     if (seriesDetails != null) {
         val series = seriesDetails!!
-        Column(modifier = Modifier.padding(16.dp).verticalScroll(rememberScrollState())) {
+        Column(modifier = Modifier
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())) {
             AsyncImage(
                 model = "https://image.tmdb.org/t/p/w500${series.backdrop_path ?: series.poster_path}",
                 contentDescription = "Poster de ${series.name}",
@@ -695,7 +743,9 @@ fun ActorDetailScreen(actorId: Int, viewModel: MainViewModel) {
 
     if (actorDetails != null) {
         val actor = actorDetails!!
-        Column(modifier = Modifier.padding(16.dp).verticalScroll(rememberScrollState())) {
+        Column(modifier = Modifier
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())) {
             AsyncImage(
                 model = "https://image.tmdb.org/t/p/w500${actor.profile_path}",
                 contentDescription = "Photo of ${actor.name}",
@@ -752,6 +802,7 @@ class MainViewModel : ViewModel() {
     val movieDetails = MutableStateFlow<TmdbMovieDetailResponse?>(null)
     val seriesDetails = MutableStateFlow<TmdbSeriesDetailResponse?>(null)
     val actorDetails = MutableStateFlow<TmdbActorDetailResponse?>(null)
+    val music = MutableStateFlow<List<PlayList>>(emptyList())
 
     val favoriteMovies = MutableStateFlow<List<TmdbMovie>>(emptyList())
     val favoriteSeries = MutableStateFlow<List<TmdbSeries>>(emptyList())
