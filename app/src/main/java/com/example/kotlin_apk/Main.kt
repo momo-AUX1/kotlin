@@ -7,6 +7,7 @@ fun main() {
     }
     println(ystudent)
     println(morestudent)
+    println(allstudent)
 }
 
 abstract class Piece() {
@@ -49,4 +50,4 @@ val etudiants = listOf(
 
 val ystudent = etudiants.find { etudiant -> etudiant.promo == "2024" }?.name
 val morestudent = etudiants.filter { it.matieres.size > 2 }.map { it.name }
-//val allstudent = etudiants.fold({it})
+val allstudent = etudiants.filter { it.matieres.isNotEmpty() }.map { it.matieres.size }.map {  }

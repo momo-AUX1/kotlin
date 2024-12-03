@@ -134,11 +134,8 @@ fun BottomNavigationBar(navController: NavHostController) {
 
 @Composable
 fun musicscreen(viewModel: MainViewModel, navController: NavHostController){
-    fun fetchPlayList(): PlayList? {
-        val moshi = Moshi.Builder().build()
-         return moshi.adapter(PlayList::class.java).fromJson(playlistjson)!!
-    }
     val music by viewModel.music.collectAsState()
+
 
     Column {
         val configuration = LocalConfiguration.current
@@ -149,7 +146,10 @@ fun musicscreen(viewModel: MainViewModel, navController: NavHostController){
             modifier = Modifier.padding(12.dp)
         ){
           items(music) { sound ->
-
+              Column(
+                  modifier = Modifier
+                      .padding(8.dp)
+              ) {
                   AsyncImage(
                       model = "file:///android_asset/images/${sound.cover}",
                       contentDescription = "Image de ${sound.title}",
@@ -158,6 +158,12 @@ fun musicscreen(viewModel: MainViewModel, navController: NavHostController){
                           .padding(bottom = 8.dp)
                           .clip(RoundedCornerShape(8.dp))
                   )
+                  Text(
+                      text = sound.title,
+                      style = MaterialTheme.typography.titleMedium,
+                      modifier = Modifier.padding(top = 4.dp)
+                  )
+              }
           }
         }
     }
@@ -819,6 +825,21 @@ class MainViewModel : ViewModel() {
             try {
                 val response = RetrofitInstance.api.getTrendingMovies(apiKey)
                 movies.value = response.results
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun getMusic() {
+        fun fetchPlayList(): PlayList {
+            val moshi = Moshi.Builder().build()
+            return moshi.adapter(PlayList::class.java).fromJson(playlistjson)!!
+        }
+        println(fetchPlayList())
+        viewModelScope.launch {
+            try {
+                music.value = listOf(fetchPlayList())
             } catch (e: Exception) {
                 e.printStackTrace()
             }
